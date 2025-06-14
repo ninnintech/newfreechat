@@ -54,10 +54,23 @@ preview_id = "your-actual-preview-kv-namespace-id"
 npm run upload-static
 ```
 
-### 5. Venice AI APIキーの設定
+### 5. プロンプトとAPIキーの安全な設定
 
+#### プロンプトファイルの作成
 ```bash
-wrangler kv:key put "venice_api_key" "your-venice-ai-api-key" --binding CHAT_KV
+# プロンプトファイルを作成（Gitで追跡されません）
+cp prompts/characters.json.example prompts/characters.json
+# エディタでプロンプトを編集
+```
+
+#### APIキーの安全な設定
+```bash
+# 対話式でAPIキーを設定（推奨）
+npm run setup-secrets
+
+# または手動で設定
+wrangler kv:key put "venice_api_key" "your-venice-ai-api-key" --binding CHAT_KV --preview false
+wrangler kv:key put "venice_api_key" "your-venice-ai-api-key" --binding CHAT_KV --preview
 ```
 
 ### 6. キャラクター画像の配置
@@ -157,9 +170,54 @@ chatfreeAI/
 - チャット画面（スマホ）: 下部にDMMウィジェット  
 - チャット画面（PC）: 左右にDMMウィジェットとDLsiteランキング
 
+## セキュリティ
+
+### 🔒 秘匿情報の管理
+
+**APIキー:**
+- ✅ Cloudflare KVに暗号化保存
+- ✅ サーバーサイドでのみアクセス
+- ❌ クライアントサイドに露出なし
+
+**プロンプト:**
+- ✅ Cloudflare KVに保存
+- ✅ 外部ファイルで管理（Git追跡外）
+- ❌ ソースコードに直接記載なし
+
+**会話履歴:**
+- ✅ ユーザーごとに分離
+- ✅ 24時間TTLで自動削除
+- ✅ フィンガープリントベースの匿名化
+
+### 🛡️ セキュリティベストプラクティス
+
+1. **APIキーの保護:**
+   ```bash
+   # ❌ 絶対にしないこと
+   const API_KEY = "sk-xxx"; // コードに直接記載
+
+   # ✅ 正しい方法
+   const apiKey = await env.CHAT_KV.get('venice_api_key');
+   ```
+
+2. **プロンプトの保護:**
+   ```bash
+   # ❌ 避けるべき
+   const prompt = "秘密のプロンプト"; // コードに直接記載
+
+   # ✅ 推奨方法
+   const prompt = await env.CHAT_KV.get('character:A');
+   ```
+
+3. **環境分離:**
+   - 開発環境: Preview KV
+   - 本番環境: Production KV
+   - 異なるAPIキーとプロンプトを使用
+
 ## 注意事項
 
 - Venice AI APIキーは必ずKVストアに保存し、コードにハードコーディングしないでください
+- プロンプトファイルは.gitignoreに追加し、バージョン管理から除外してください
 - 本番環境では適切なドメインとCORS設定を行ってください
 - 画像ファイルは著作権に注意して使用してください
 

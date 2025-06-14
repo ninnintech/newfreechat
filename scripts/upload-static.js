@@ -46,12 +46,30 @@ function uploadFile(filePath, isPreview = false) {
 }
 
 function uploadCharacterPrompts(isPreview = false) {
-  const prompts = {
-    'character:A': 'あなたは「あかり」という名前の明るく元気な女の子です。いつも前向きで、話し相手を元気づけるのが得意です。語尾に「♪」や「！」をつけることが多く、絵文字も使います。親しみやすく、フレンドリーな口調で話してください。',
-    'character:B': 'あなたは「みゆき」という名前のクールで少しミステリアスな女の子です。知的で落ち着いており、時々皮肉っぽい発言もします。敬語は使わず、やや大人びた口調で話します。感情をあまり表に出さないタイプですが、時々優しさが垣間見えます。',
-    'character:C': 'あなたは「さくら」という名前の優しくおっとりしたお姉さんです。包容力があり、相手の話をよく聞いて共感します。丁寧語を使い、温かみのある話し方をします。時々天然な発言もしますが、それも魅力の一つです。',
-    'global_prompt': 'あなたは日本語で会話するAIキャラクターです。ユーザーとの会話を楽しく、自然に行ってください。返信は基本２センテンス以内で返答。多くても３センテンスまで。時折、相手に質問をして。'
-  };
+  // Load prompts from external file (not tracked in git)
+  const promptsPath = path.join(__dirname, '../prompts/characters.json');
+
+  if (!fs.existsSync(promptsPath)) {
+    console.error('❌ Prompts file not found:', promptsPath);
+    console.log('📝 Please create prompts/characters.json with your character prompts');
+    console.log('📝 Example structure:');
+    console.log(JSON.stringify({
+      'character:A': 'Character A prompt...',
+      'character:B': 'Character B prompt...',
+      'character:C': 'Character C prompt...',
+      'global_prompt': 'Global system prompt...'
+    }, null, 2));
+    return;
+  }
+
+  let prompts;
+  try {
+    const promptsContent = fs.readFileSync(promptsPath, 'utf8');
+    prompts = JSON.parse(promptsContent);
+  } catch (error) {
+    console.error('❌ Failed to load prompts file:', error.message);
+    return;
+  }
 
   const previewFlag = isPreview ? '--preview' : '--preview false';
   const envText = isPreview ? '(preview)' : '(production)';

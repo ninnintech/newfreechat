@@ -6,7 +6,8 @@
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "upload-static": "node scripts/upload-static.js",
-    "setup": "npm run upload-static",
+    "setup-secrets": "node scripts/setup-secrets.js",
+    "setup": "npm run upload-static && npm run setup-secrets",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": ["ai", "chat", "cloudflare", "workers"],
