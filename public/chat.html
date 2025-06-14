@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>チャット - AIキャラクターチャット</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@4/dist/fp.min.js"></script>
+</head>
+<body class="chat-page">
+    <div class="chat-container">
+        <!-- PC用左側広告 -->
+        <div class="ad-left desktop-only">
+            <ins class="dmm-widget-placement" data-id="02b8392dd9929b9e0b7cba3f43216810" style="background:transparent"></ins>
+            <script src="https://widget-view.dmm.co.jp/js/placement.js" class="dmm-widget-scripts" data-id="02b8392dd9929b9e0b7cba3f43216810"></script>
+        </div>
+
+        <!-- メインチャットエリア -->
+        <div class="chat-main">
+            <div class="chat-background"></div>
+            <div class="chat-header">
+                <button class="back-button" onclick="window.location.href='/'">← 戻る</button>
+                <h2 id="character-name">チャット</h2>
+                <div class="remaining-chats">
+                    残り<span id="remaining-count">20</span>回
+                </div>
+            </div>
+
+            <div class="chat-messages" id="chat-messages">
+                <!-- チャットメッセージがここに表示される -->
+            </div>
+
+            <div class="chat-input-container">
+                <div class="chat-input-wrapper">
+                    <input type="text" id="message-input" placeholder="メッセージを入力..." maxlength="500">
+                    <button id="send-button">送信</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- スマホ用下部広告 -->
+        <div class="ad-bottom mobile-only">
+            <ins class="dmm-widget-placement" data-id="58d10a0b4d473a8f22c9e6f223be24f7" style="background:transparent"></ins>
+            <script src="https://widget-view.dmm.co.jp/js/placement.js" class="dmm-widget-scripts" data-id="58d10a0b4d473a8f22c9e6f223be24f7"></script>
+        </div>
+
+        <!-- PC用右側広告 -->
+        <div class="ad-right desktop-only">
+            <script type="text/javascript">
+                blogparts={"base":"https://www.dlsite.com/","type":"ranking","site":"maniax","query":{"period":"week","options":["-GRO","-MEN"]},"title":"ランキング","display":"vertical","detail":"1","column":"v","image":"large","count":"3","wrapper":"1","autorotate":true,"aid":"nukeningu"}
+            </script>
+            <script type="text/javascript" src="https://www.dlsite.com/js/blogparts.js" charset="UTF-8"></script>
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+    <script>
+        // チャット機能の初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeChat();
+        });
+
+        let currentCharacter = null;
+        let fingerprint = null;
+        let isLimitReached = false;
+
+        async function initializeChat() {
+            // URLパラメータからキャラクターIDを取得
+            const urlParams = new URLSearchParams(window.location.search);
+            currentCharacter = urlParams.get('character');
+
+            if (!currentCharacter) {
+                window.location.href = '/';
+                return;
+            }
+
+            // フィンガープリント生成
+            const fp = await FingerprintJS.load();
+            const result = await fp.get();
+            fingerprint = result.visitorId;
+
+            // キャラクター情報設定
+            setCharacterInfo(currentCharacter);
+
+            // イベントリスナー設定
+            setupEventListeners();
+
+            // チャット履歴復元
+            loadChatHistory();
+
+            // 残り回数を取得
+            await loadRemainingChats();
+
+            // 履歴がない場合のみ初期メッセージ表示
+            setTimeout(() => {
+                const messagesContainer = document.getElementById('chat-messages');
+                if (messagesContainer.children.length === 0) {
+                    showInitialMessage();
+                }
+            }, 100);
+        }
+
+        function setCharacterInfo(characterId) {
+            const characterNames = {
+                'A': 'あかり',
+                'B': 'みゆき',
+                'C': 'さくら'
+            };
+
+            const characterClasses = {
+                'A': 'character-a',
+                'B': 'character-b',
+                'C': 'character-c'
+            };
+
+            document.getElementById('character-name').textContent = characterNames[characterId] || 'キャラクター';
+
+            // 背景画像設定
+            const chatMain = document.querySelector('.chat-main');
+
+            // 既存のキャラクタークラスを削除
+            if (chatMain) {
+                chatMain.classList.remove('character-a', 'character-b', 'character-c');
+
+                // CSS背景画像用のクラスを追加
+                if (characterClasses[characterId]) {
+                    chatMain.classList.add(characterClasses[characterId]);
+                    console.log('Character class added:', characterClasses[characterId]);
+                }
+            }
+        }
+
+        function setupEventListeners() {
+            const messageInput = document.getElementById('message-input');
+            const sendButton = document.getElementById('send-button');
+
+            sendButton.addEventListener('click', sendMessage);
+            messageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+        }
+
+        function showInitialMessage() {
+            const initialMessages = {
+                'A': 'こんにちは！あかりです♪ 今日はどんなお話をしましょうか？',
+                'B': 'こんにちは。みゆきよ。何か話したいことがあるの？',
+                'C': 'こんにちは、さくらです。ゆっくりお話ししましょうね。'
+            };
+
+            const message = initialMessages[currentCharacter] || 'こんにちは！';
+
+            // 少し遅延してから初期メッセージを表示（スクロールなし）
+            setTimeout(() => {
+                addMessage('ai', message, true);
+            }, 500);
+        }
+
+        async function sendMessage() {
+            if (isLimitReached) return;
+
+            const messageInput = document.getElementById('message-input');
+            const message = messageInput.value.trim();
+
+            if (!message) return;
+
+            // ユーザーメッセージ表示
+            addMessage('user', message);
+            messageInput.value = '';
+
+            // 送信ボタン無効化
+            const sendButton = document.getElementById('send-button');
+            sendButton.disabled = true;
+            sendButton.textContent = '送信中...';
+
+            try {
+                // APIリクエスト
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        characterId: currentCharacter,
+                        userMessage: message,
+                        fingerprint: fingerprint
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // AIメッセージ表示
+                    addMessage('ai', data.message);
+
+                    // 残り回数更新
+                    updateRemainingChats(data.remainingChats);
+
+                    // チャット履歴保存
+                    saveChatHistory();
+                } else {
+                    if (response.status === 429) {
+                        // 利用制限に達した場合
+                        addMessage('ai', data.message);
+                        setLimitReached();
+                    } else {
+                        addMessage('ai', 'すみません、エラーが発生しました。もう一度お試しください。');
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('ai', 'すみません、エラーが発生しました。もう一度お試しください。');
+            }
+
+            // 送信ボタン復活
+            sendButton.disabled = false;
+            sendButton.textContent = '送信';
+        }
+
+        function addMessage(sender, message, skipScroll = false) {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.textContent = message;
+
+            messageDiv.appendChild(messageContent);
+            messagesContainer.appendChild(messageDiv);
+
+            // 新しいメッセージの場合のみスクロール
+            if (!skipScroll) {
+                // メッセージが画面中央を超えたらスクロール開始
+                setTimeout(() => {
+                    const containerHeight = messagesContainer.clientHeight;
+                    const scrollHeight = messagesContainer.scrollHeight;
+                    const currentScroll = messagesContainer.scrollTop;
+
+                    // 画面中央を超えた場合のみスクロール
+                    if (scrollHeight > containerHeight * 0.6) {
+                        messagesContainer.scrollTo({
+                            top: scrollHeight - containerHeight * 0.4,
+                            behavior: 'smooth'
+                        });
+                    }
+                }, 50);
+            }
+
+            // メッセージが多くなったら古いものを削除（最大50件）
+            const messages = messagesContainer.children;
+            if (messages.length > 50) {
+                messagesContainer.removeChild(messages[0]);
+            }
+        }
+
+        function updateRemainingChats(remaining) {
+            document.getElementById('remaining-count').textContent = remaining;
+
+            if (remaining <= 0) {
+                setLimitReached();
+            }
+        }
+
+        function setLimitReached() {
+            isLimitReached = true;
+            const messageInput = document.getElementById('message-input');
+            const sendButton = document.getElementById('send-button');
+
+            messageInput.disabled = true;
+            messageInput.placeholder = '本日の利用制限に達しました';
+            sendButton.disabled = true;
+        }
+
+        function loadChatHistory() {
+            const historyKey = `chat_history_${currentCharacter}`;
+            const history = localStorage.getItem(historyKey);
+
+            if (history) {
+                const messages = JSON.parse(history);
+                const messagesContainer = document.getElementById('chat-messages');
+
+                // 履歴は一括で高速表示
+                const fragment = document.createDocumentFragment();
+
+                messages.forEach((msg) => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = `message ${msg.sender}-message`;
+
+                    const messageContent = document.createElement('div');
+                    messageContent.className = 'message-content';
+                    messageContent.textContent = msg.message;
+
+                    messageDiv.appendChild(messageContent);
+                    fragment.appendChild(messageDiv);
+                });
+
+                // 一括でDOMに追加
+                messagesContainer.appendChild(fragment);
+
+                // 履歴復元後は最下部にスクロール（即座に）
+                setTimeout(() => {
+                    const containerHeight = messagesContainer.clientHeight;
+                    const scrollHeight = messagesContainer.scrollHeight;
+                    messagesContainer.scrollTop = scrollHeight - containerHeight * 0.4;
+                }, 50);
+            }
+        }
+
+        function saveChatHistory() {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messages = Array.from(messagesContainer.children).map(msgDiv => {
+                const sender = msgDiv.classList.contains('user-message') ? 'user' : 'ai';
+                const message = msgDiv.querySelector('.message-content').textContent;
+                return { sender, message };
+            });
+
+            const historyKey = `chat_history_${currentCharacter}`;
+            localStorage.setItem(historyKey, JSON.stringify(messages));
+        }
+
+        async function loadRemainingChats() {
+            try {
+                const response = await fetch('/api/remaining', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        fingerprint: fingerprint
+                    })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    updateRemainingChats(data.remainingChats);
+                    if (data.remainingChats <= 0) {
+                        setLimitReached();
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading remaining chats:', error);
+                // デフォルト値として20を設定
+                updateRemainingChats(20);
+            }
+        }
+    </script>
+</body>
+</html>

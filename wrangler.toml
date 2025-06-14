@@ -1,0 +1,14 @@
+name = "chatfreeai"
+main = "src/worker.js"
+compatibility_date = "2024-01-01"
+
+[env.production]
+name = "chatfreeai"
+
+[[kv_namespaces]]
+binding = "CHAT_KV"
+id = "e4901ca704d54cdf8cce666d7623aed0"
+preview_id = "3e8f418b571e42f887e5e520271481ee"
+
+[vars]
+ENVIRONMENT = "development"

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIキャラクターチャット</title>
+    <link rel="stylesheet" href="/css/style.css?v=2024122702">
+    <style>
+        /* 強制的にスクエア画像を適用 */
+        .character-image {
+            width: 100% !important;
+            max-width: 280px !important;
+            height: 250px !important;
+            border-radius: 10px !important;
+            object-fit: cover !important;
+            object-position: center top !important;
+            margin: 0 auto 15px auto !important;
+            border: 4px solid #667eea !important;
+            display: block !important;
+            background: #f0f0f0 !important;
+        }
+
+        @media (max-width: 768px) {
+            .character-image {
+                width: 100% !important;
+                max-width: 250px !important;
+                height: 200px !important;
+                border-radius: 10px !important;
+                margin: 0 auto 15px auto !important;
+                object-fit: cover !important;
+                object-position: center top !important;
+            }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@4/dist/fp.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AIキャラクターチャット</h1>
+            <p>お気に入りのキャラクターを選んでチャットを楽しもう！</p>
+        </header>
+
+        <main>
+            <!-- PC用広告（キャラクターの上） -->
+            <div class="ad-container ad-top-pc">
+                <ins class="dmm-widget-placement" data-id="6a9d758775dcf0e0b17bca5ba4d9d6c5" style="background:transparent"></ins>
+                <script src="https://widget-view.dmm.co.jp/js/placement.js" class="dmm-widget-scripts" data-id="6a9d758775dcf0e0b17bca5ba4d9d6c5"></script>
+            </div>
+
+            <!-- スマホ用広告（キャラクターの上） -->
+            <div class="ad-container ad-top-mobile">
+                <ins class="dmm-widget-placement" data-id="ef127a09baa827dfd54c7414bd6536d9" style="background:transparent"></ins>
+                <script src="https://widget-view.dmm.co.jp/js/placement.js" class="dmm-widget-scripts" data-id="ef127a09baa827dfd54c7414bd6536d9"></script>
+            </div>
+
+            <div class="character-selection">
+                <div class="character-card" data-character="A">
+                    <img src="/images/character-a.jpg" alt="あかり" class="character-image">
+                    <div class="character-info">
+                        <h3>あかり</h3>
+                        <p>明るく元気な女の子</p>
+                    </div>
+                </div>
+
+                <div class="character-card" data-character="B">
+                    <img src="/images/character-b.jpg" alt="みゆき" class="character-image">
+                    <div class="character-info">
+                        <h3>みゆき</h3>
+                        <p>クールで少しミステリアスな女の子</p>
+                    </div>
+                </div>
+
+                <div class="character-card" data-character="C">
+                    <img src="/images/character-c.jpg" alt="さくら" class="character-image">
+                    <div class="character-info">
+                        <h3>さくら</h3>
+                        <p>優しくおっとりしたお姉さん</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 広告エリア（キャラクターの下） -->
+            <div class="ad-container">
+                <ins class="dmm-widget-placement" data-id="1969b2fbda6520b5080f385af94fb47d" style="background:transparent"></ins>
+                <script src="https://widget-view.dmm.co.jp/js/placement.js" class="dmm-widget-scripts" data-id="1969b2fbda6520b5080f385af94fb47d"></script>
+            </div>
+        </main>
+
+        <footer>
+            <div class="footer-links">
+                <a href="/terms.html">利用規約</a>
+                <a href="/privacy.html">プライバシーポリシー</a>
+            </div>
+            <p>&copy; 2024 AIキャラクターチャット. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script src="/js/app.js"></script>
+    <script>
+        // キャラクター選択の処理
+        document.addEventListener('DOMContentLoaded', function() {
+            const characterCards = document.querySelectorAll('.character-card');
+            const characterImages = document.querySelectorAll('.character-image');
+
+            // 画像の読み込み状況をデバッグ
+            characterImages.forEach((img, index) => {
+                console.log(`Image ${index + 1} src:`, img.src);
+
+                img.onload = function() {
+                    console.log(`Image ${index + 1} loaded successfully:`, this.src);
+                    // 画像読み込み成功時にもスタイルを強制適用
+                    this.style.width = '100%';
+                    this.style.maxWidth = '280px';
+                    this.style.height = '250px';
+                    this.style.borderRadius = '10px';
+                    this.style.margin = '0 auto 15px auto';
+                    this.style.border = '4px solid #667eea';
+                    this.style.objectFit = 'cover';
+                    this.style.objectPosition = 'center top';
+                    this.style.display = 'block';
+                };
+
+                img.onerror = function() {
+                    console.error(`Image ${index + 1} failed to load:`, this.src);
+                    // フォールバック: 背景色のみ表示
+                    this.style.display = 'block';
+                    this.style.width = '100%';
+                    this.style.maxWidth = '280px';
+                    this.style.height = '250px';
+                    this.style.borderRadius = '10px';
+                    this.style.margin = '0 auto 15px auto';
+                    this.style.border = '4px solid #667eea';
+                    this.style.objectFit = 'cover';
+                    this.style.objectPosition = 'center top';
+                };
+            });
+
+            characterCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const characterId = this.dataset.character;
+                    window.location.href = `/chat.html?character=${characterId}`;
+                });
+            });
+        });
+    </script>
+</body>
+</html>
