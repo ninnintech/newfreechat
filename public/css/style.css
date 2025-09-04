@@ -366,30 +366,31 @@ footer {
 
 /* Typing indicator styles */
 .typing-indicator {
-    display: inline-flex;
+    display: inline-flex !important;
     align-items: center;
     gap: 4px;
     padding: 8px 0;
 }
 
 .typing-indicator span {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: #999;
-    animation: typing-bounce 1.4s infinite ease-in-out;
+    width: 8px !important;
+    height: 8px !important;
+    border-radius: 50% !important;
+    background-color: #999 !important;
+    animation: typing-bounce 1.4s infinite ease-in-out !important;
+    display: inline-block !important;
 }
 
 .typing-indicator span:nth-child(1) {
-    animation-delay: -0.32s;
+    animation-delay: -0.32s !important;
 }
 
 .typing-indicator span:nth-child(2) {
-    animation-delay: -0.16s;
+    animation-delay: -0.16s !important;
 }
 
 .typing-indicator span:nth-child(3) {
-    animation-delay: 0s;
+    animation-delay: 0s !important;
 }
 
 @keyframes typing-bounce {
@@ -405,14 +406,14 @@ footer {
 
 /* Typing message specific styles */
 .typing-message .message-content {
-    background: rgba(255, 255, 255, 0.6);
-    color: #333;
-    border-bottom-left-radius: 4px;
-    border: 1px solid rgba(224, 224, 224, 0.3);
-    backdrop-filter: blur(5px);
-    min-height: 40px;
-    display: flex;
-    align-items: center;
+    background: rgba(255, 255, 255, 0.6) !important;
+    color: #333 !important;
+    border-bottom-left-radius: 4px !important;
+    border: 1px solid rgba(224, 224, 224, 0.3) !important;
+    backdrop-filter: blur(5px) !important;
+    min-height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
 }
 
 .chat-input-container {

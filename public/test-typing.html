@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typing Animation Test</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body {
+            padding: 50px;
+            background: #f0f0f0;
+        }
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .test-message {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Typing Animation Test</h1>
+        
+        <div class="test-message">
+            <h3>Test 1: Basic typing indicator</h3>
+            <span class="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+            </span>
+        </div>
+
+        <div class="test-message">
+            <h3>Test 2: In message format</h3>
+            <div class="message ai-message typing-message">
+                <div class="message-content typing-content">
+                    <span class="typing-indicator">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-message">
+            <h3>Test 3: Manual CSS test</h3>
+            <div style="display: inline-flex; align-items: center; gap: 4px; padding: 8px 0;">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background-color: #999; animation: typing-bounce 1.4s infinite ease-in-out; animation-delay: -0.32s;"></span>
+                <span style="width: 8px; height: 8px; border-radius: 50%; background-color: #999; animation: typing-bounce 1.4s infinite ease-in-out; animation-delay: -0.16s;"></span>
+                <span style="width: 8px; height: 8px; border-radius: 50%; background-color: #999; animation: typing-bounce 1.4s infinite ease-in-out; animation-delay: 0s;"></span>
+            </div>
+        </div>
+
+        <button onclick="testDynamicCreation()">Test Dynamic Creation</button>
+        <div id="dynamic-test"></div>
+    </div>
+
+    <script>
+        function testDynamicCreation() {
+            const container = document.getElementById('dynamic-test');
+            container.innerHTML = '';
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message ai-message typing-message';
+
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content typing-content';
+            
+            messageContent.innerHTML = '<span class="typing-indicator"><span></span><span></span><span></span></span>';
+
+            messageDiv.appendChild(messageContent);
+            container.appendChild(messageDiv);
+            
+            console.log('Dynamic typing message created:', messageDiv);
+        }
+    </script>
+</body>
+</html>

@@ -187,6 +187,9 @@
             sendButton.disabled = true;
             sendButton.textContent = '送信中...';
 
+            // 「入力中」メッセージを表示
+            const typingMessage = addTypingMessage();
+
             try {
                 // APIリクエスト
                 const response = await fetch('/api/chat', {
@@ -202,6 +205,9 @@
                 });
 
                 const data = await response.json();
+
+                // 「入力中」メッセージを削除
+                removeTypingMessage(typingMessage);
 
                 if (response.ok) {
                     // AIメッセージ表示
@@ -223,6 +229,8 @@
                 }
             } catch (error) {
                 console.error('Error:', error);
+                // 「入力中」メッセージを削除
+                removeTypingMessage(typingMessage);
                 addMessage('ai', 'すみません、エラーが発生しました。もう一度お試しください。');
             }
 
@@ -356,6 +364,45 @@
                 console.error('Error loading remaining chats:', error);
                 // デフォルト値として20を設定
                 updateRemainingChats(20);
+            }
+        }
+
+        function addTypingMessage() {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message ai-message typing-message';
+
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content typing-content';
+
+            // 入力中のアニメーション
+            messageContent.innerHTML = '<span class="typing-indicator"><span></span><span></span><span></span></span>';
+
+            messageDiv.appendChild(messageContent);
+            messagesContainer.appendChild(messageDiv);
+
+            // デバッグ用ログ
+            console.log('Typing message added:', messageDiv);
+            console.log('Typing indicator HTML:', messageContent.innerHTML);
+
+            // スクロール
+            setTimeout(() => {
+                const containerHeight = messagesContainer.clientHeight;
+                const scrollHeight = messagesContainer.scrollHeight;
+                if (scrollHeight > containerHeight * 0.6) {
+                    messagesContainer.scrollTo({
+                        top: scrollHeight - containerHeight * 0.4,
+                        behavior: 'smooth'
+                    });
+                }
+            }, 50);
+
+            return messageDiv;
+        }
+
+        function removeTypingMessage(typingMessage) {
+            if (typingMessage && typingMessage.parentNode) {
+                typingMessage.parentNode.removeChild(typingMessage);
             }
         }
     </script>
