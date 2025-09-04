@@ -12,7 +12,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>チャット - AIキャラクターチャット</title>
-    <link rel="stylesheet" href="/css/style.css?v=20250614-5">
+    <link rel="stylesheet" href="/css/style.css?v=20250904-typing">
     <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@4/dist/fp.min.js"></script>
     <style>
         /* Typing indicator styles - fallback for deployment */
@@ -99,6 +99,7 @@
                 <div class="chat-input-wrapper">
                     <input type="text" id="message-input" placeholder="メッセージを入力..." maxlength="500">
                     <button id="send-button">送信</button>
+                    <button id="debug-typing" style="background: red; margin-left: 10px;">TEST</button>
                 </div>
             </div>
         </div>
@@ -198,6 +199,7 @@
         function setupEventListeners() {
             const messageInput = document.getElementById('message-input');
             const sendButton = document.getElementById('send-button');
+            const debugButton = document.getElementById('debug-typing');
 
             sendButton.addEventListener('click', sendMessage);
             messageInput.addEventListener('keypress', function(e) {
@@ -205,6 +207,16 @@
                     e.preventDefault();
                     sendMessage();
                 }
+            });
+
+            // デバッグボタン
+            debugButton.addEventListener('click', function() {
+                console.log('Debug button clicked');
+                const typingMessage = addTypingMessage();
+                setTimeout(() => {
+                    removeTypingMessage(typingMessage);
+                    addMessage('ai', 'テストメッセージです');
+                }, 3000);
             });
         }
 
