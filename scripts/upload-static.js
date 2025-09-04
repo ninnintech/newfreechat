@@ -15,6 +15,7 @@ const staticFiles = [
   'chat.html',
   'terms.html',
   'privacy.html',
+  'test-typing.html',
   'css/style.css',
   'js/app.js',
   'images/character-a.jpg',
