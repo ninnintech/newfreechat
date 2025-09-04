@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .typing-test {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background: #f9f9f9;
+        }
+        
+        /* Simple typing animation */
+        .typing-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 0;
+        }
+
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #999;
+            animation: typing-bounce 1.4s infinite ease-in-out;
+            display: inline-block;
+        }
+
+        .typing-indicator span:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0s;
+        }
+
+        @keyframes typing-bounce {
+            0%, 80%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Debug Test Page</h1>
+        <p>Current time: <span id="current-time"></span></p>
+        
+        <div class="typing-test">
+            <h3>Typing Animation Test</h3>
+            <p>If you can see bouncing dots below, the animation is working:</p>
+            <span class="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+            </span>
+        </div>
+        
+        <div class="typing-test">
+            <h3>Manual Test</h3>
+            <button onclick="createTypingIndicator()">Create Typing Indicator</button>
+            <div id="manual-test"></div>
+        </div>
+    </div>
+
+    <script>
+        // Update current time
+        document.getElementById('current-time').textContent = new Date().toLocaleString();
+        
+        function createTypingIndicator() {
+            const container = document.getElementById('manual-test');
+            container.innerHTML = '<span class="typing-indicator"><span></span><span></span><span></span></span>';
+        }
+    </script>
+</body>
+</html>

@@ -91,25 +91,9 @@ function uploadCharacterPrompts(isPreview = false) {
 function main() {
   console.log('Uploading static files to Cloudflare KV...\n');
 
-  // Upload to production KV
-  console.log('📦 Uploading to PRODUCTION KV...');
-  staticFiles.forEach(file => uploadFile(file, false));
-
-  console.log('\n📦 Uploading to PREVIEW KV (for development)...');
-  staticFiles.forEach(file => uploadFile(file, true));
-
-  console.log('\nSetting up character prompts...\n');
-
-  // Upload character prompts to both environments
-  console.log('📝 Setting up prompts in PRODUCTION KV...');
-  uploadCharacterPrompts(false);
-
-  console.log('\n📝 Setting up prompts in PREVIEW KV...');
-  uploadCharacterPrompts(true);
-
-  console.log('\n⚠️  Don\'t forget to set your Venice AI API key for both environments:');
-  console.log('Production: npx wrangler kv key put "venice_api_key" "your-api-key-here" --binding CHAT_KV --preview false');
-  console.log('Preview: npx wrangler kv key put "venice_api_key" "your-api-key-here" --binding CHAT_KV --preview');
+  // Upload only chat.html to production KV
+  console.log('📦 Uploading chat.html to PRODUCTION KV...');
+  uploadFile('chat.html', false);
 
   console.log('\nDone! 🎉');
 }
